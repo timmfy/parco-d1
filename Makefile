@@ -13,8 +13,8 @@ OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Compiler and flags
 CC := gcc
-CFLAGS := -Wall -Wextra -O3 -fopenmp
-LDFLAGS := -fopenmp
+CFLAGS := -Wall -Wextra -O3 -fopenmp -lm
+LDFLAGS := -fopenmp -lm
 
 # Headers
 HEADERS := $(wildcard $(INCLUDE_DIR)/*.h)

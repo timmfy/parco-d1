@@ -2,46 +2,43 @@
 #include "stdlib.h"
 #include "matrix_utils.h"
 #include "transposition.h"
-#include "sequential.h"
+#include "imp_par.h"
 
-void seqTest(int N){
+void parTest(int N, int blockSize){
 
     printf("-------------------------\n");
-    printf("Sequential implementation\n");
+    printf("Parallel implementation\n");
     printf("-------------------------\n");
-    //Generate random symmetric matrix
-    double** SYM = matGenerateSym(N);
-    if (checkSymSeq(SYM, N)) {
+    double** A = matGenerateSym(N);
+    if (checkSymImp(A, N, blockSize)) {
         for (int i = 0; i < N; i++) {
-            free(SYM[i]);
+            free(A[i]);
         }
-        free(SYM);
+        free(A);
     }
     else{
         fprintf(stderr, "%s", "Error: Random symmetric matrix is not symmetric\n");
         exit(1);
     }
-    //Generate random matrix
-    double** A = matGenerate(N);
-    if (checkSymSeq(A, N)) {
+    double** B = matGenerate(N);
+    if (checkSymImp(B, N, blockSize)) {
         for (int i = 0; i < N; i++) {
-            free(A[i]);
+            free(B[i]);
         }
-        free(A);
+        free(B);
         fprintf(stderr, "%s", "Error: Random matrix is symmetric\n");
         exit(1);
     }
-    //Sequential transpose
-    double** B = matTranspose(A, N);
-    if (!isTransposed(A, B, N)) {
-        fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
+    double** C = matTranspose(B, N);
+    if (!isTransposed(B, C, N)) {
+        fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
         exit(1);
     }
-    //Cleanup
     for (int i = 0; i < N; i++) {
-        free(A[i]);
         free(B[i]);
+        free(C[i]);
     }
-    free(A);
     free(B);
+    free(C);
+
 }

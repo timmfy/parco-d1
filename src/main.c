@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "sequential.h"
+#include "math.h"
 int main(int argc, char** argv){
     
     if (argc != 2){
@@ -12,6 +13,8 @@ int main(int argc, char** argv){
         fprintf(stderr, "%s", "Error: Invalid matrix size\n");
         exit(1);
     }
-    seqImplTest(N);
+
+    seqTest((int)pow(2, N));
+    parTest((int)pow(2, N), 8);
     return 0;
 }   
