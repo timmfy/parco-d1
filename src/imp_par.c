@@ -1,44 +1,31 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include "matrix_utils.h"
-#include "transposition.h"
 #include "imp_par.h"
+#include "time.h"
+#include "omp.h"
 
-void parTest(int N, int blockSize){
-
-    printf("-------------------------\n");
-    printf("Parallel implementation\n");
-    printf("-------------------------\n");
-    double** A = matGenerateSym(N);
-    if (checkSymImp(A, N, blockSize)) {
-        for (int i = 0; i < N; i++) {
-            free(A[i]);
+//checkSym function with implicit parallelism and optimized for cache
+int checkSymImp(double** A, int N, int blockSize){
+    for(int i = 0; i < N; i += blockSize){
+        for(int j = 0; j < N; j += blockSize){
+            for(int ii = i; ii < i + blockSize; ii++){
+                for(int jj = j; jj < j + blockSize; jj++){
+                    if(A[ii][jj] != A[jj][ii]){
+                        return 0;
+                    }
+                }
+            }
         }
-        free(A);
     }
-    else{
-        fprintf(stderr, "%s", "Error: Random symmetric matrix is not symmetric\n");
-        exit(1);
-    }
-    double** B = matGenerate(N);
-    if (checkSymImp(B, N, blockSize)) {
-        for (int i = 0; i < N; i++) {
-            free(B[i]);
-        }
-        free(B);
-        fprintf(stderr, "%s", "Error: Random matrix is symmetric\n");
-        exit(1);
-    }
-    double** C = matTranspose(B, N);
-    if (!isTransposed(B, C, N)) {
-        fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
-        exit(1);
-    }
-    for (int i = 0; i < N; i++) {
-        free(B[i]);
-        free(C[i]);
-    }
-    free(B);
-    free(C);
-
+    return 1;
+}
+//time measurement for checkSymImp
+int checkSymImpTime(double** A, int N, int blockSize){
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    int result = checkSymImp(A, N, blockSize);
+    clock_gettime(CLOCK_REALTIME, &end);
+    double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    printf("Elapsed time for implicitly parallel checkSym: %.9f\n", elapsed);
+    return result;
 }

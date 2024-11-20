@@ -13,7 +13,7 @@ OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Compiler and flags
 CC := gcc
-CFLAGS := -Wall -Wextra -O3 -fopenmp -lm
+CFLAGS := -Wall -Wextra -fopenmp
 LDFLAGS := -fopenmp -lm
 
 # Headers
@@ -30,6 +30,8 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 # Compile
+$(OBJ_DIR)/imp_par.o : $(SRC_DIR)/imp_par.c $(INCLUDE_DIR)/imp_par.h | $(OBJ_DIR)
+	$(CC) -O3 -ftree-vectorize -I$(INCLUDE_DIR) -c $< -o $@
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS) | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
