@@ -3,4 +3,5 @@
 
 int checkSymImp(double** A, int N, int blockSize);
 int checkSymImpTime(double** A, int N, int blockSize);
+double** matTransposeImp(double** A, int N, int blockSize);
 #endif

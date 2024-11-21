@@ -29,9 +29,15 @@ $(OBJ_DIR):
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-# Compile
+# Compile the imp_par file with appropriate flags
 $(OBJ_DIR)/imp_par.o : $(SRC_DIR)/imp_par.c $(INCLUDE_DIR)/imp_par.h | $(OBJ_DIR)
-	$(CC) -O3 -ftree-vectorize -I$(INCLUDE_DIR) -c $< -o $@
+	$(CC) -O3 -ftree-vectorize -funroll-loops -fopt-info -I$(INCLUDE_DIR) -c $< -o $@
+
+# Compile the imp_seq file with appropriate flags
+$(OBJ_DIR)/seq.o : $(SRC_DIR)/seq.c $(INCLUDE_DIR)/seq.h | $(OBJ_DIR)
+	$(CC) -O3 -ftree-vectorize -fopenmp -I$(INCLUDE_DIR) -c $< -o $@
+
+# Compile the rest of the files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS) | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 

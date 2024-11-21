@@ -4,7 +4,7 @@
 #include "imp_par.h"
 #include "imp_par_test.h"
 
-void parTest(int N, int blockSize, double** M) {
+void impParTest(int N, int blockSize, double** M, int numRuns){
 
     printf("-------------------------\n");
     printf("Implicit parallel implementation\n");
@@ -19,11 +19,13 @@ void parTest(int N, int blockSize, double** M) {
         printf("Matrix is not symmetric\n");
     }
 
-    //Transpose matrix and verify if it is correct
-    double** T = matTranspose(M, N);
-    if (!isTransposed(M, T, N)) {
-        fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
-        exit(1);
+    for (int i = 0; i < numRuns; i++){
+        //Transpose matrix and verify if it is correct
+        double** T = matTransposeImp(M, N, blockSize);
+        if (!isTransposed(M, T, N)) {
+            fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
+            exit(1);
+        }
     }
     return;
 

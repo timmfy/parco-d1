@@ -3,7 +3,7 @@
 #include "seq.h"
 #include "seq_test.h"
 
-void seqTest(int N, double** M){
+void seqTest(int N, double** M, int numRuns){
 
     printf("-------------------------\n");
     printf("Sequential implementation\n");
@@ -16,10 +16,12 @@ void seqTest(int N, double** M){
     }
     //Sequential transpose
     printf("Matrix is not symmetric\n");
-    double** T = matTranspose(M, N);
-    if (!isTransposed(M, T, N)) {
-        fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
-        exit(1);
+    for (int i = 0; i < numRuns; i++){
+        double** T = matTranspose(M, N);
+        if (!isTransposed(M, T, N)) {
+            fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
+            exit(1);
+        }
     }
     return;
 }
