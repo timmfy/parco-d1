@@ -3,6 +3,7 @@
 
 double** matGenerate(int N);
 double** matGenerateSym(int N);
+void matRandomize(double** M, int N);
 int checkSymSeq(double** A, int N, double* time);
 double** matTranspose(double** M, int N, double* time);
 int isTransposed(double** A, double** B, int N);

@@ -39,8 +39,8 @@ double** matTransposeImp(double** A, int N, int blockSize, double* time){
     clock_gettime(CLOCK_REALTIME, &start);
     for(int i = 0; i < N; i += blockSize){
         for(int j = 0; j < N; j += blockSize){
-            for(int ii = i; ii < i + blockSize; ii++){
-                for(int jj = j; jj < j + blockSize; jj++){
+            for(int ii = i; ii < i + blockSize && ii < N; ii++){
+                for(int jj = j; jj < j + blockSize && jj < N; jj++){
                     B[ii][jj] = A[jj][ii];
                 }
             }

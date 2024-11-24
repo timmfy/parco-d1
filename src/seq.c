@@ -47,6 +47,15 @@ double** matGenerateSym(int N){
     return A;
 }
 
+//Matrix randomization function
+void matRandomize(double** M, int N){
+    for (int i = 0; i < N; i++){
+        for (int j = 0; j < N; j++){
+            M[i][j] = (double) rand() / RAND_MAX;
+        }
+    }
+}
+
 //Simple checkSym function with the wall time measurement
 int checkSymSeq(double** A, int N, double* time){
     struct timespec start, end;

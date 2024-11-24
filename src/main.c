@@ -3,6 +3,7 @@
 #include "seq_test.h"
 #include "string.h"
 #include "imp_par_test.h"
+#include "seq.h"
 #include "math.h"
 int main(int argc, char** argv){
     
@@ -15,11 +16,11 @@ int main(int argc, char** argv){
     int test_exp = 0; //Run explicit parallel test by default
     //Set the execution parameters
     for (int i = 1; i < argc; i++){
-        //printf("Argument: %s\n", argv[i]);
+        printf("Argument: %s\n", argv[i]);
         //Set the matrix size
         if (strcmp(argv[i], "--size") == 0){
             if (i + 1 < argc){
-                N = (int)(pow(2, atoi(argv[i + 1])));
+                N = atoi(argv[i + 1]);
                 i++;
             }
             else{
@@ -102,20 +103,10 @@ int main(int argc, char** argv){
     //Generate random matrix
     double** M = (double**)malloc(N * sizeof(double*));
     if (genSym == 1){
-        for (int i = 0; i < N; i++){
-            M[i] = (double*)malloc(N * sizeof(double));
-            for (int j = 0; j < N; j++){
-                M[i][j] = (double) i * j; 
-            }
-        }
+        M = matGenerateSym(N);
     }
     else{
-        for (int i = 0; i < N; i++){
-            M[i] = (double*)malloc(N * sizeof(double));
-            for (int j = 0; j < N; j++){
-                M[i][j] = (double)rand() / RAND_MAX;
-            }
-        }
+        M = matGenerate(N);
     }
     
     //Run the tests
