@@ -9,10 +9,13 @@ int main(int argc, char** argv){
     int N = (int)(pow(2, 10)); //Default matrix size
     int blockSize = 4; //Default block size
     int numRuns = 1; //Default number of runs
-    int test = 0; //Default test to run (0 = all, 1 = sequential, 2 = implicit parallel, 3 = explicit parallel)
     int genSym = 0; //Generate symmetric matrix (0 by default)
+    int test_seq = 0; //Run sequential test by default
+    int test_imp = 0; //Run implicit parallel test by default
+    int test_exp = 0; //Run explicit parallel test by default
     //Set the execution parameters
     for (int i = 1; i < argc; i++){
+        //printf("Argument: %s\n", argv[i]);
         //Set the matrix size
         if (strcmp(argv[i], "--size") == 0){
             if (i + 1 < argc){
@@ -36,31 +39,7 @@ int main(int argc, char** argv){
             }
         }
         //Select tests to run
-        else if (strcmp(argv[i], "--test") == 0){
-            if (i + 1 < argc){
-                if (strcmp(argv[i + 1], "all") == 0){
-                    test = 0;
-                }
-                else if (strcmp(argv[i + 1], "seq") == 0){
-                    test = 1;
-                }
-                else if (strcmp(argv[i + 1], "imp") == 0){
-                    test = 2;
-                }
-                else if (strcmp(argv[i + 1], "exp") == 0){
-                    test = 3;
-                }
-                else{
-                    fprintf(stderr, "%s", "Error: Invalid test\n");
-                    exit(1);
-                }
-                i++;
-            }
-            else{
-                fprintf(stderr, "%s", "Error: --test flag requires an argument\n");
-                exit(1);
-            }
-        }
+
         //Set the number of runs
         else if (strcmp(argv[i], "--runs") == 0){
             if (i + 1 < argc){
@@ -87,8 +66,25 @@ int main(int argc, char** argv){
             }
         }
         //Add later
-        else{
-            fprintf(stderr, "%s", "Error: Invalid flag\n");
+        else if ((argv[i][0] == '-') && (argv[i][1] != '-')) {
+            for (int j = 1; j < (int)strlen(argv[i]); j++) {
+                switch (argv[i][j]) {
+                    case 's':
+                        test_seq = 1;
+                        break;
+                    case 'i':
+                        test_imp = 1;
+                        break;
+                    case 'e':
+                        test_exp = 1;
+                        break;
+                    default:
+                        fprintf(stderr, "Error: Invalid test option '%c'\n", argv[i][j]);
+                        exit(1);
+                }
+            }
+        } else {
+            fprintf(stderr, "Error: Unknown argument '%s'\n", argv[i]);
             exit(1);
         }
     }
@@ -123,17 +119,13 @@ int main(int argc, char** argv){
     }
     
     //Run the tests
-    if (test == 0){
-        seqTest(N, M, numRuns);
-        impParTest(N, blockSize, M, numRuns);
-    }
-    else if (test == 1){
+    if (test_seq) {
         seqTest(N, M, numRuns);
     }
-    else if (test == 2){
+    if (test_imp) {
         impParTest(N, blockSize, M, numRuns);
     }
-    else if (test == 3){
+    if (test_exp) {
         fprintf(stderr, "%s", "Error: Explicit parallel implementation not available\n");
         exit(1);
     }

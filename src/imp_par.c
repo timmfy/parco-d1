@@ -20,17 +20,17 @@ int checkSymImp(double** A, int N, int blockSize){
     return 1;
 }
 //time measurement for checkSymImp
-int checkSymImpTime(double** A, int N, int blockSize){
+int checkSymImpTime(double** A, int N, int blockSize, double* time){
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     int result = checkSymImp(A, N, blockSize);
     clock_gettime(CLOCK_REALTIME, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("Elapsed time for implicitly parallel checkSym: %.9f\n", elapsed);
+    *time = elapsed;
     return result;
 }
 
-double** matTransposeImp(double** A, int N, int blockSize){
+double** matTransposeImp(double** A, int N, int blockSize, double* time){
     double** B = (double**)malloc(N * sizeof(double*));
     for(int i = 0; i < N; i++){
         B[i] = (double*)malloc(N * sizeof(double));
@@ -48,6 +48,6 @@ double** matTransposeImp(double** A, int N, int blockSize){
     }
     clock_gettime(CLOCK_REALTIME, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("Elapsed time for implicitly parallel matrix transpose: %.9f\n", elapsed);
+    *time = elapsed;
     return B;
 }

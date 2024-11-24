@@ -48,7 +48,7 @@ double** matGenerateSym(int N){
 }
 
 //Simple checkSym function with the wall time measurement
-int checkSymSeq(double** A, int N){
+int checkSymSeq(double** A, int N, double* time){
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     for(int i = 0; i < N; i++){
@@ -56,19 +56,19 @@ int checkSymSeq(double** A, int N){
             if(A[i][j] != A[j][i]){
                 clock_gettime(CLOCK_REALTIME, &end);
                 double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-                printf("Time taken for sequential checkSym: %.9f\n", elapsed);
+                *time = elapsed;
                 return 0;
             }
         }
     }
     clock_gettime(CLOCK_REALTIME, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("Time taken for sequential checkSym: %.9f\n", elapsed);
+    *time = elapsed;
     return 1;
 }
 
 //Simple sequential transpose function
-double** matTranspose(double** M, int N){
+double** matTranspose(double** M, int N, double* time){
 
     //Allocate memory for the transposed matrix
     double** T = (double**) malloc(N * sizeof(double*));
@@ -92,7 +92,7 @@ double** matTranspose(double** M, int N){
     }
     clock_gettime(CLOCK_REALTIME, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("Time taken for sequential transpose: %.9f\n", elapsed);
+    *time = elapsed;
     return T;
 }
 //Function to check if the matrix is transposed

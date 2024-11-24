@@ -99,7 +99,20 @@ if [[ $blockSize -le 1 || $blockSize -gt 4096 ]]; then
 fi
 
 echo "Number of runs: $numRuns"
+echo "Matrix size: 2^$N"
+cat <<EOL > parco-d1-job.pbs
+#!/bin/bash
+#PBS -N parco-d1-job
+#PBS -o ./parco-d1-job.out
+#PBS -e ./parco-d1-job.err
+#PBS -q short_cpuQ
+#PBS -l walltime=0:03:00
+#PBS -l select=1:ncpus=1:mem=1mb
+module load gcc91
+cd ${PWD}
 make all
-echo "Running test..."
+echo "Running tests..."
 ./bin/main --size $N --runs $numRuns --block-size $blockSize --symm $genSym --test $test
 make clean
+
+EOL
