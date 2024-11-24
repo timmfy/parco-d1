@@ -31,7 +31,7 @@ $(BIN_DIR):
 
 # Compile the imp_par file with appropriate flags
 $(OBJ_DIR)/imp_par.o : $(SRC_DIR)/imp_par.c $(INCLUDE_DIR)/imp_par.h | $(OBJ_DIR)
-	$(CC) -ftree-vectorize -funroll-loops -fopt-info -I$(INCLUDE_DIR) -c $< -o $@
+	$(CC) -O3 -ffast-math -ftree-vectorize -fopt-info -I$(INCLUDE_DIR) -c $< -o $@
 
 # Compile the imp_seq file with appropriate flags
 $(OBJ_DIR)/seq.o : $(SRC_DIR)/seq.c $(INCLUDE_DIR)/seq.h | $(OBJ_DIR)

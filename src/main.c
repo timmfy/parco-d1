@@ -5,19 +5,20 @@
 #include "imp_par_test.h"
 #include "seq.h"
 #include "math.h"
+
 int main(int argc, char** argv){
-    
-    int N = (int)(pow(2, 10)); //Default matrix size
-    int blockSize = 4; //Default block size
-    int numRuns = 1; //Default number of runs
-    int genSym = 0; //Generate symmetric matrix (0 by default)
-    int test_seq = 0; //Run sequential test by default
-    int test_imp = 0; //Run implicit parallel test by default
-    int test_exp = 0; //Run explicit parallel test by default
-    //Set the execution parameters
+    int N = (int)(pow(2, 10)); // Default matrix size
+    int blockSize = 4; // Default block size
+    int numRuns = 1; // Default number of runs
+    int genSym = 0; // Generate symmetric matrix (0 by default)
+    int test_seq = 0; // Run sequential test by default
+    int test_imp = 0; // Run implicit parallel test by default
+    int test_exp = 0; // Run explicit parallel test by default
+
+    // Set the execution parameters
     for (int i = 1; i < argc; i++){
         printf("Argument: %s\n", argv[i]);
-        //Set the matrix size
+        // Set the matrix size
         if (strcmp(argv[i], "--size") == 0){
             if (i + 1 < argc){
                 N = atoi(argv[i + 1]);
@@ -28,7 +29,7 @@ int main(int argc, char** argv){
                 exit(1);
             }
         }
-        //Set the block size
+        // Set the block size
         else if (strcmp(argv[i], "--block-size") == 0){
             if (i + 1 < argc){
                 blockSize = atoi(argv[i + 1]);
@@ -39,9 +40,7 @@ int main(int argc, char** argv){
                 exit(1);
             }
         }
-        //Select tests to run
-
-        //Set the number of runs
+        // Set the number of runs
         else if (strcmp(argv[i], "--runs") == 0){
             if (i + 1 < argc){
                 numRuns = atoi(argv[i + 1]);
@@ -56,6 +55,7 @@ int main(int argc, char** argv){
                 exit(1);
             }
         }
+        // Generate symmetric matrix
         else if (strcmp(argv[i], "--symm") == 0){
             if (i + 1 < argc){
                 genSym = atoi(argv[i + 1]);
@@ -65,8 +65,12 @@ int main(int argc, char** argv){
                 }
                 i++;
             }
+            else{
+                fprintf(stderr, "%s", "Error: --symm flag requires an argument\n");
+                exit(1);
+            }
         }
-        //Add later
+        // Select tests to run
         else if ((argv[i][0] == '-') && (argv[i][1] != '-')) {
             for (int j = 1; j < (int)strlen(argv[i]); j++) {
                 switch (argv[i][j]) {
@@ -89,6 +93,7 @@ int main(int argc, char** argv){
             exit(1);
         }
     }
+
     printf("Matrix: %dx%d\n", N, N);
     if ((N <= 1) || (N > 4096)){
         fprintf(stderr, "%s", "Error: Invalid matrix size\n");
@@ -100,16 +105,16 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-    //Generate random matrix
-    double** M = (double**)malloc(N * sizeof(double*));
+    // Generate random matrix
+    double* M;
     if (genSym == 1){
         M = matGenerateSym(N);
     }
     else{
         M = matGenerate(N);
     }
-    
-    //Run the tests
+
+    // Run the tests
     if (test_seq) {
         seqTest(N, M, numRuns);
     }
@@ -120,9 +125,7 @@ int main(int argc, char** argv){
         fprintf(stderr, "%s", "Error: Explicit parallel implementation not available\n");
         exit(1);
     }
-    for (int i = 0; i < N; i++){
-        free(M[i]);
-    }
+
     free(M);
     return 0;
 }

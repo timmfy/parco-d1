@@ -2,15 +2,14 @@
 #include "stdlib.h"
 #include "imp_par.h"
 #include "time.h"
-#include "omp.h"
 
-//checkSym function with implicit parallelism and optimized for cache
-int checkSymImp(double** A, int N, int blockSize){
+// checkSym function with implicit parallelism and optimized for cache
+int checkSymImp(double* A, int N, int blockSize){
     for(int i = 0; i < N; i += blockSize){
         for(int j = 0; j < N; j += blockSize){
-            for(int ii = i; ii < i + blockSize; ii++){
-                for(int jj = j; jj < j + blockSize; jj++){
-                    if(A[ii][jj] != A[jj][ii]){
+            for(int ii = i; ii < i + blockSize && ii < N; ii++){
+                for(int jj = j; jj < j + blockSize && jj < N; jj++){
+                    if(A[ii * N + jj] != A[jj * N + ii]){
                         return 0;
                     }
                 }
@@ -19,8 +18,9 @@ int checkSymImp(double** A, int N, int blockSize){
     }
     return 1;
 }
-//time measurement for checkSymImp
-int checkSymImpTime(double** A, int N, int blockSize, double* time){
+
+// time measurement for checkSymImp
+int checkSymImpTime(double* A, int N, int blockSize, double* time){
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     int result = checkSymImp(A, N, blockSize);
@@ -30,18 +30,15 @@ int checkSymImpTime(double** A, int N, int blockSize, double* time){
     return result;
 }
 
-double** matTransposeImp(double** A, int N, int blockSize, double* time){
-    double** B = (double**)malloc(N * sizeof(double*));
-    for(int i = 0; i < N; i++){
-        B[i] = (double*)malloc(N * sizeof(double));
-    }
+double* matTransposeImp(double* A, int N, int blockSize, double* time){
+    double* B = (double*)malloc(N * N * sizeof(double));
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     for(int i = 0; i < N; i += blockSize){
         for(int j = 0; j < N; j += blockSize){
             for(int ii = i; ii < i + blockSize && ii < N; ii++){
                 for(int jj = j; jj < j + blockSize && jj < N; jj++){
-                    B[ii][jj] = A[jj][ii];
+                    B[ii * N + jj] = A[jj * N + ii];
                 }
             }
         }
@@ -51,3 +48,5 @@ double** matTransposeImp(double** A, int N, int blockSize, double* time){
     *time = elapsed;
     return B;
 }
+
+double matTransposeImpDiag(double* A, int N, double* time){}
