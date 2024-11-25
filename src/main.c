@@ -7,7 +7,6 @@
 #include "math.h"
 
 int main(int argc, char** argv){
-    int N = (int)(pow(2, 10)); // Default matrix size
     int blockSize = 4; // Default block size
     int numRuns = 1; // Default number of runs
     int genSym = 0; // Generate symmetric matrix (0 by default)
@@ -17,20 +16,9 @@ int main(int argc, char** argv){
 
     // Set the execution parameters
     for (int i = 1; i < argc; i++){
-        printf("Argument: %s\n", argv[i]);
-        // Set the matrix size
-        if (strcmp(argv[i], "--size") == 0){
-            if (i + 1 < argc){
-                N = atoi(argv[i + 1]);
-                i++;
-            }
-            else{
-                fprintf(stderr, "%s", "Error: --size flag requires an argument\n");
-                exit(1);
-            }
-        }
+        //printf("Argument: %s\n", argv[i]);
         // Set the block size
-        else if (strcmp(argv[i], "--block-size") == 0){
+        if (strcmp(argv[i], "--block-size") == 0){
             if (i + 1 < argc){
                 blockSize = atoi(argv[i + 1]);
                 i++;
@@ -108,24 +96,28 @@ int main(int argc, char** argv){
     // Generate random matrix
     double* M;
     if (genSym == 1){
-        M = matGenerateSym(N);
+        M = matGenerateSym();
     }
     else{
-        M = matGenerate(N);
+        M = matGenerate();
     }
 
     // Run the tests
+    double seqTime = 0.0, impTime = 0.0, expTime = 0.0;
     if (test_seq) {
-        seqTest(N, M, numRuns);
+        seqTime = seqTest(M, numRuns);
     }
     if (test_imp) {
-        impParTest(N, blockSize, M, numRuns);
+        impTime = impParTest(blockSize, M, numRuns);
     }
     if (test_exp) {
         fprintf(stderr, "%s", "Error: Explicit parallel implementation not available\n");
-        exit(1);
     }
-
+    if ((test_seq) && (test_imp)){
+        printf("Sequential time: %f\n", seqTime);
+        printf("Implicit parallel time: %f\n", impTime);
+        printf("Speedup implicit parallel: %f\n", seqTime / impTime);
+    }
     free(M);
     return 0;
 }

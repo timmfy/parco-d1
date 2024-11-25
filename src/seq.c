@@ -4,7 +4,7 @@
 #include "time.h"
 
 // Random matrix generation function
-double* matGenerate(int N){
+double* matGenerate(){
     printf("Generating random matrix\n");
     double* A = (double*) malloc(N * N * sizeof(double));
     if(A == NULL){
@@ -18,7 +18,7 @@ double* matGenerate(int N){
 }
 
 // Random symmetric matrix generation function
-double* matGenerateSym(int N){
+double* matGenerateSym(){
     printf("Generating random symmetric matrix\n");
     double* A = (double*) malloc(N * N * sizeof(double));
     if(A == NULL){
@@ -35,14 +35,14 @@ double* matGenerateSym(int N){
 }
 
 // Matrix randomization function
-void matRandomize(double* M, int N){
+void matRandomize(double* M){
     for (int i = 0; i < N * N; i++){
         M[i] = (double) rand() / RAND_MAX;
     }
 }
 
 // Simple checkSym function with the wall time measurement
-int checkSymSeq(double* A, int N, double* time){
+int checkSymSeq(double* A, double* time){
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     for(int i = 0; i < N; i++){
@@ -62,7 +62,7 @@ int checkSymSeq(double* A, int N, double* time){
 }
 
 // Simple sequential transpose function
-double* matTranspose(double* M, int N, double* time){
+double* matTranspose(double* M, double* time){
     double* T = (double*) malloc(N * N * sizeof(double));
     if (T == NULL){
         printf("Memory allocation failed\n");
@@ -82,7 +82,7 @@ double* matTranspose(double* M, int N, double* time){
 }
 
 // Function to check if the matrix is transposed
-int isTransposed(double* A, double* B, int N){
+int isTransposed(double* A, double* B){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             if(A[i * N + j] != B[j * N + i]){

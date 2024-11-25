@@ -3,7 +3,7 @@
 #include "seq.h"
 #include "seq_test.h"
 
-void seqTest(int N, double* M, int numRuns){
+double seqTest(double* M, int numRuns){
     printf("-------------------------\n");
     printf("Sequential implementation\n");
     printf("-------------------------\n");
@@ -11,22 +11,23 @@ void seqTest(int N, double* M, int numRuns){
     double avgTime = 0;
     for (int i = 0; i < numRuns; i++){
         // Check if matrix is symmetric
-        if (checkSymSeq(M, N, &time)){
+        if (checkSymSeq(M, &time)){
             printf("Matrix is symmetric: no need to transpose\n");
             printf("Time to check symmetry: %.9f\n", time);
-            return;
+            return time;
         }
         // Sequential transpose
-        double* T = matTranspose(M, N, &time);
+        double* T = matTranspose(M, &time);
         printf("Time to transpose: %.9f\n", time);
         avgTime += time;
-        if (!isTransposed(M, T, N)) {
+        if (!isTransposed(M, T)) {
             fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
             exit(1);
         }
-        matRandomize(M, N);
+        matRandomize(M);
         free(T);
     }
     avgTime /= numRuns;
     printf("Average time of %d runs: %.9f\n", numRuns, avgTime);
+    return avgTime;
 }

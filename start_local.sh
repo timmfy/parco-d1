@@ -135,10 +135,13 @@ if [[ $tests == "-" ]]; then
 fi
 
 echo "Number of runs: $numRuns"
-echo "Matrix size: 2^$N"
-make all
+echo "-------------------------"
+echo "Compiling..."
+echo "-------------------------"
+make all N=$N
+echo "-------------------------"
 echo "Running tests..."
-
-./bin/main --size $N --block-size $blockSize --runs $numRuns --symm $genSym $tests
+echo "-------------------------"
+./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests
 
 make clean

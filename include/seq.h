@@ -1,11 +1,11 @@
 #ifndef SEQ_H
 #define SEQ_H
 
-double* matGenerate(int N);
-double* matGenerateSym(int N);
-void matRandomize(double* M, int N);
-int checkSymSeq(double* A, int N, double* time);
-double* matTranspose(double* M, int N, double* time);
-int isTransposed(double* A, double* B, int N);
+double* matGenerate();
+double* matGenerateSym();
+void matRandomize(double* M);
+int checkSymSeq(double* A, double* time);
+double* matTranspose(double* M, double* time);
+int isTransposed(double* A, double* B);
 
 #endif
