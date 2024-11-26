@@ -46,7 +46,7 @@ int checkSymSeq(double* A, double* time){
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
+        for(int j = i + 1; j < N; j++){
             if(A[i * N + j] != A[j * N + i]){
                 clock_gettime(CLOCK_REALTIME, &end);
                 double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;

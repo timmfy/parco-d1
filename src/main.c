@@ -1,10 +1,10 @@
 #include "stdio.h"
 #include "stdlib.h"
-#include "seq_test.h"
 #include "string.h"
-#include "imp_par_test.h"
 #include "seq.h"
-#include "math.h"
+#include "seq_test.h"
+#include "imp_par_test.h"
+#include "omp_par_test.h"
 
 int main(int argc, char** argv){
     int blockSize = 4; // Default block size
@@ -13,6 +13,7 @@ int main(int argc, char** argv){
     int test_seq = 0; // Run sequential test by default
     int test_imp = 0; // Run implicit parallel test by default
     int test_exp = 0; // Run explicit parallel test by default
+    int ompThreads = 4; // Default number of threads
 
     // Set the execution parameters
     for (int i = 1; i < argc; i++){
@@ -76,7 +77,22 @@ int main(int argc, char** argv){
                         exit(1);
                 }
             }
-        } else {
+        }
+        else if (strcmp(argv[i], "--threads") == 0){
+            if (i + 1 < argc){
+                ompThreads = atoi(argv[i + 1]);
+                if (ompThreads <= 0){
+                    fprintf(stderr, "%s", "Error: Number of threads must be greater than 0\n");
+                    exit(1);
+                }
+                i++;
+            }
+            else{
+                fprintf(stderr, "%s", "Error: --threads flag requires an argument\n");
+                exit(1);
+            }
+        }
+        else {
             fprintf(stderr, "Error: Unknown argument '%s'\n", argv[i]);
             exit(1);
         }
@@ -103,21 +119,27 @@ int main(int argc, char** argv){
     }
 
     // Run the tests
-    double seqTime = 0.0, impTime = 0.0, expTime = 0.0;
+    double seqTime = 0.0, impTime = 0.0, ompTime = 0.0;
     if (test_seq) {
         seqTime = seqTest(M, numRuns);
+        printf("Sequential time: %.9f\n", seqTime);
     }
     if (test_imp) {
         impTime = impParTest(blockSize, M, numRuns);
+        printf("Implicit parallel time: %.9f\n", impTime);
     }
     if (test_exp) {
-        fprintf(stderr, "%s", "Error: Explicit parallel implementation not available\n");
+        ompTime = ompParTest(blockSize, ompThreads, M, numRuns);
+        printf("OMP parallel time: %.9f\n", ompTime);
     }
     if ((test_seq) && (test_imp)){
-        printf("Sequential time: %f\n", seqTime);
-        printf("Implicit parallel time: %f\n", impTime);
-        printf("Speedup implicit parallel: %f\n", seqTime / impTime);
+        printf("-------------------------\n");
+        printf("Speedup implicit parallel: %.9f\n", seqTime / impTime);
     }
+    if ((test_seq) && (test_exp)){
+        printf("Speedup explicit parallel: %.9f\n", seqTime / ompTime);
+    }
+    printf("-------------------------\n");
     free(M);
     return 0;
 }

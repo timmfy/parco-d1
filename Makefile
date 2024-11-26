@@ -14,7 +14,7 @@ OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 # Compiler and flags
 CC := gcc
 CFLAGS := -Wall -Wextra -fopenmp -DN=$(N)
-LDFLAGS := -fopenmp -lm
+LDFLAGS := -fopenmp
 
 # Headers
 HEADERS := $(wildcard $(INCLUDE_DIR)/*.h)
