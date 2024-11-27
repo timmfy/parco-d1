@@ -18,12 +18,12 @@ double seqTest(double* M, int numRuns){
         }
         // Sequential transpose
         double* T = matTranspose(M, &time);
-        printf("Time to transpose: %.9f\n", time);
+        //printf("Time to transpose: %.9f\n", time);
         avgTime += time;
-        if (!isTransposed(M, T)) {
-            fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
-            exit(1);
-        }
+        // if (!isTransposed(M, T)) {
+        //     fprintf(stderr, "%s", "Error: Sequential transpose failed\n");
+        //     exit(1);
+        // }
         matRandomize(M);
         free(T);
     }

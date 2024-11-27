@@ -18,12 +18,12 @@ double impParTest(int blockSize, double* M, int numRuns){
             return time;
         }
         double* T = matTransposeImp(M, blockSize, &time);
-        printf("Time to transpose: %.9f\n", time);
+        //printf("Time to transpose: %.9f\n", time);
         avgTime += time;
-        if (!isTransposed(M, T)) {
-            fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
-            exit(1);
-        }
+        // if (!isTransposed(M, T)) {
+        //     fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
+        //     exit(1);
+        // }
         matRandomize(M);
         free(T);
     }

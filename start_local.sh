@@ -6,6 +6,7 @@ blockSize=4  # Default block size
 numRuns=1  # Default number of runs
 tests="-" 
 genSym=0  # Generate symmetric matrix (0 by default)
+threads=4 # Default number of threads
 
 # Function to display help
 show_help() {
@@ -16,6 +17,7 @@ show_help() {
     echo "  -e                  Run explicit parallel test"
     echo "  -h --help              Display this information"
     echo "  -i                  Run implicit parallel test"
+    echo " --threads <int>     Set the number of threads (default: 4)"
     echo " --profiling <string> Run the specified test with profiling"
     echo "  --runs <int>        Set the number of runs (default: 1)"
     echo "  --size <int>        Set the matrix size to 2^<int> (default: 2^10)"
@@ -72,6 +74,19 @@ while [[ $# -gt 0 ]]; do
                 shift
             else
                 echo "Error: --symm flag requires an argument"
+                exit 1
+            fi
+            ;;
+        --threads)
+            if [[ -n $2 ]]; then
+                threads=$2
+                if [[ $threads -le 0 ]]; then
+                    echo "Error: Number of threads must be greater than 0"
+                    exit 1
+                fi
+                shift
+            else
+                echo "Error: --threads flag requires an argument"
                 exit 1
             fi
             ;;
@@ -142,6 +157,6 @@ make all N=$N
 echo "-------------------------"
 echo "Running tests..."
 echo "-------------------------"
-./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests
+./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads
 
 make clean

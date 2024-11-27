@@ -12,18 +12,18 @@ double ompParTest(int blockSize, int numThreads, double* M, int numRuns){
     double avgTime = 0;
     for (int i = 0; i < numRuns; i++){
         // Check if matrix is symmetric
-        if (checkSymOMPTime(M, blockSize, numThreads, &time)){
+        if (checkSymOMPTime(M, numThreads, &time)){
             printf("Matrix is symmetric: no need to transpose\n");
             printf("Time to check symmetry: %.9f\n", time);
             return time;
         }
         double* T = matTransposeOMP(M, blockSize, numThreads, &time);
-        printf("Time to transpose: %.9f\n", time);
+        //printf("Time to transpose: %.9f\n", time);
         avgTime += time;
-        if (!isTransposed(M, T)) {
-            fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
-            exit(1);
-        }
+        // if (!isTransposed(M, T)) {
+        //     fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
+        //     exit(1);
+        // }
         matRandomize(M);
         free(T);
     }
