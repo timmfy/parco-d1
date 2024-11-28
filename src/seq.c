@@ -5,7 +5,7 @@
 
 // Random matrix generation function
 double* matGenerate(){
-    printf("Generating random matrix\n");
+    //printf("Generating random matrix\n");
     double* A = (double*) malloc(N * N * sizeof(double));
     if(A == NULL){
         printf("Memory allocation failed\n");
@@ -19,7 +19,7 @@ double* matGenerate(){
 
 // Random symmetric matrix generation function
 double* matGenerateSym(){
-    printf("Generating random symmetric matrix\n");
+    //printf("Generating random symmetric matrix\n");
     double* A = (double*) malloc(N * N * sizeof(double));
     if(A == NULL){
         printf("Memory allocation failed\n");

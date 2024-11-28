@@ -3,18 +3,23 @@
 #include "seq.h"
 #include "seq_test.h"
 
-double seqTest(double* M, int numRuns){
+double seqTest(int numRuns, int symmetric){
     printf("-------------------------\n");
     printf("Sequential implementation\n");
     printf("-------------------------\n");
     double time;
     double avgTime = 0;
+    double* M;
+    if (symmetric)
+        M = matGenerateSym();
+    else
+        M = matGenerate();
     for (int i = 0; i < numRuns; i++){
         // Check if matrix is symmetric
         if (checkSymSeq(M, &time)){
-            printf("Matrix is symmetric: no need to transpose\n");
-            printf("Time to check symmetry: %.9f\n", time);
-            return time;
+            avgTime += time;
+            M = matGenerateSym();
+            continue;
         }
         // Sequential transpose
         double* T = matTranspose(M, &time);

@@ -1,53 +1,76 @@
 #!/bin/bash
 
 # Default values
-N=1024  # Default matrix size (2^10)
-blockSize=4  # Default block size
+#Array of matrix sizes
+nRange=(0 0 0 0 0 0 0 0 0 0 1 0 0)
+tRange=(0 1 1 1 0 0 0)
+blockSize=16  # Default block size
 numRuns=1  # Default number of runs
-tests="-" 
+tests="-sio" # Default tests to run
 genSym=0  # Generate symmetric matrix (0 by default)
 threads=4 # Default number of threads
+profiling=""
+summary_file="summary.txt"
+> "$summary_file"
 
 # Function to display help
 show_help() {
     echo "Usage: $0 [OPTION]..."
     echo "Options:"
-    echo "  -a                  Run all tests"
-    echo "  --block-size <int>  Set the block size to <int> (default: 4)"
-    echo "  -e                  Run explicit parallel test"
+    echo "  --block-size <int>  Set the block size to 2^<int> (default: 2^4)"
     echo "  -h --help              Display this information"
-    echo "  -i                  Run implicit parallel test"
     echo " --threads <int>     Set the number of threads (default: 4)"
-    echo " --profiling <string> Run the specified test with profiling"
+    echo " --threads-range <int int> Run the test for the range of threads 2^<int> to 2^<int> (default: 2^1 2^3, max: 2^6)"
+    echo " --profiling <string> Run the specified test with profiling (seq, imp, omp)"
+    echo " --size-range <int int> Run the test for the range of sizes 2^<int> to 2^<int> (default: 2^10 2^10)"
     echo "  --runs <int>        Set the number of runs (default: 1)"
-    echo "  --size <int>        Set the matrix size to 2^<int> (default: 2^10)"
     echo "  --symm <int>        Generate a symmetric matrix (default: 0)"
-    echo "  -s                  Run sequential test"
-   
+
 }
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --help)
+        -h|--help)
             show_help
             exit 0
             ;;
-        --size)
-            if [[ -n $2 ]]; then
-                N=$((2**$2))
+        --size-range)
+            if [[ -n $2 ]] && [[ -n $3 ]]; then
+                if [[ $2 -le 0 || $2 -gt 12 || $3 -le 0 || $3 -gt 12 ]]; then
+                    echo "Error: Invalid matrix size range"
+                    exit 1
+                fi
+                nRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
+                for (( i=$2; i<=$3; i++ )); do
+                    nRange[$i]=1
+                done
+                shift
                 shift
             else
-                echo "Error: --size flag requires an argument"
+                echo "Error: --size-range flag requires two arguments"
                 exit 1
             fi
             ;;
         --block-size)
             if [[ -n $2 ]]; then
-                blockSize=$2
+                blockSize=$((2**$2))
                 shift
             else
                 echo "Error: --block-size flag requires an argument"
+                exit 1
+            fi
+            ;;
+        --profiling)
+            if [[ -n $2 ]]; then
+                profiling=$2
+                if [[ $profiling != "seq" && $profiling != "imp" && $profiling != "omp" ]]; then
+                    echo "Error: Invalid profiling argument"
+                    exit 1
+                fi
+                shift
+            else
+                echo "Error: --profiling flag requires an argument"
                 exit 1
             fi
             ;;
@@ -90,33 +113,22 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        -?*)
-            for (( i=1; i<${#1}; i++ )); do
-                case ${1:i:1} in
-                    a)
-                        test_seq=1
-                        test_imp=1
-                        test_exp=1
-                        ;;
-                    s)
-                        test_seq=1
-                        ;;
-                    i)
-                        test_imp=1
-                        ;;
-                    e)
-                        test_exp=1
-                        ;;
-                    h)
-                        show_help
-                        exit 0
-                        ;;
-                    *)
-                        echo "Error: Invalid test option '${1:i:1}'"
-                        exit 1
-                        ;;
-                esac
-            done
+        --threads-range)
+            if [[ -n $2 ]] && [[ -n $3 ]]; then
+                if [[ $2 -le 0 || $2 -gt 6 || $3 -le 0 || $3 -gt 6 ]]; then
+                    echo "Error: Invalid thread range"
+                    exit 1
+                fi
+                tRange=(0 0 0 0 0 0 0)
+                for (( i=$2; i<=$3; i++ )); do
+                    tRange[$i]=1
+                done
+                shift
+                shift
+            else
+                echo "Error: --threads-range flag requires two arguments"
+                exit 1
+            fi
             ;;
         *)
             echo "Error: Unknown argument '$1'"
@@ -126,37 +138,77 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ $N -le 1 || $N -gt 4096 ]]; then
-    echo "Error: Invalid matrix size"
-    exit 1
+if [[ $profiling == "seq" ]]; then
+    tests="-s"
+    tRange=(0 0 0 0 0 0 0)
+elif [[ $profiling == "imp" ]]; then
+    tests="-i"
+    tRange=(0 0 0 0 0 0 0)
+elif [[ $profiling == "omp" ]]; then
+    tests="-o"
 fi
 
-if [[ $blockSize -le 1 || $blockSize -gt 4096 ]]; then
-    echo "Error: Invalid block size"
-    exit 1
-fi
+for i in "${!nRange[@]}"; do
+    if [[ ${nRange[$i]} -eq 1 ]]; then
+        N=$((2**$i))
+        if [[ $blockSize -gt $N ]]; then
+            echo "Error: Block size must be less than or equal to matrix size"
+            exit 1
+        fi
+    fi
+done
 
-if [[ $test_seq -ne 0 ]]; then
-    tests+="s"
+if [[ $profiling == "" ]]; then
+    #Compile and run for the nRange
+    echo "Profiling: $profiling"
+    echo "Tests to run: $tests"
+    for i in "${!nRange[@]}"; do
+        echo ${nRange[$i]}
+        if [[ ${nRange[$i]} -eq 1 ]]; then
+            N=$((2**$i))
+            echo "Number of runs: $numRuns"
+            echo "-------------------------"
+            echo "Compiling..."
+            echo "-------------------------"
+            make all N=$N
+            echo "-------------------------"
+            echo "Running tests..."
+            echo "-------------------------"
+            echo "-------------------------" >> "$summary_file"
+            echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_file"
+            ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads 2>&1 | tail -n 3 >> "$summary_file"
+            make clean
+        fi
+    done
+else
+    #Compile and profile with likwid the selected test
+    #for threads and sizes
+    echo ${nRange[@]}
+    echo ${tRange[@]}
+    echo "Tests to run: $tests"
+    for i in "${!nRange[@]}"; do
+        if [[ ${nRange[$i]} -eq 1 ]]; then
+            N=$((2**$i))
+            for j in "${!tRange[@]}"; do
+                if [[ ${tRange[$j]} -eq 1 ]]; then
+                    threads=$((2**$j))
+                    echo "Number of runs: $numRuns"
+                    echo "-------------------------"
+                    echo "Compiling..."
+                    echo "-------------------------"
+                    make all N=$N
+                    echo "-------------------------"
+                    echo "Running tests..."
+                    echo "-------------------------"
+                    echo "-------------------------" >> "$summary_file"
+                    echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_file"
+                    likwid-perfctr -C 0-$(($threads-1)) -g MEM_DP ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads >> "$summary_file"
+                    make clean
+                fi
+            done
+        fi
+    done
 fi
-if [[ $test_imp -ne 0 ]]; then
-    tests+="i"
-fi
-if [[ $test_exp -ne 0 ]]; then
-    tests+="e"
-fi
-if [[ $tests == "-" ]]; then
-    tests="-sie"
-fi
-
-echo "Number of runs: $numRuns"
-echo "-------------------------"
-echo "Compiling..."
-echo "-------------------------"
-make all N=$N
-echo "-------------------------"
-echo "Running tests..."
-echo "-------------------------"
-./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads
-
 make clean
+echo "Summary:"
+cat "$summary_file"
