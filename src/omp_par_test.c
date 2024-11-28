@@ -4,18 +4,23 @@
 #include "omp_par.h"
 #include "omp_par_test.h"
 
-double ompParTest(int blockSize, int numThreads, double* M, int numRuns){
+double ompParTest(int blockSize, int numThreads, int numRuns, int symmetric){
     printf("-------------------------\n");
     printf("OpenMP implementation\n");
     printf("-------------------------\n");
     double time;
     double avgTime = 0;
+    double *M;
+    if (symmetric)
+        M = matGenerateSym();
+    else
+        M = matGenerate();
     for (int i = 0; i < numRuns; i++){
         // Check if matrix is symmetric
         if (checkSymOMPTime(M, numThreads, &time)){
-            printf("Matrix is symmetric: no need to transpose\n");
-            printf("Time to check symmetry: %.9f\n", time);
-            return time;
+            avgTime += time;
+            M = matGenerateSym();
+            continue;
         }
         double* T = matTransposeOMP(M, blockSize, numThreads, &time);
         //printf("Time to transpose: %.9f\n", time);

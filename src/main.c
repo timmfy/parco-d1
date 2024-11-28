@@ -69,7 +69,7 @@ int main(int argc, char** argv){
                     case 'i':
                         test_imp = 1;
                         break;
-                    case 'e':
+                    case 'o':
                         test_exp = 1;
                         break;
                     default:
@@ -109,27 +109,18 @@ int main(int argc, char** argv){
         exit(1);
     }
 
-    // Generate random matrix
-    double* M;
-    if (genSym == 1){
-        M = matGenerateSym();
-    }
-    else{
-        M = matGenerate();
-    }
-
     // Run the tests
     double seqTime = 0.0, impTime = 0.0, ompTime = 0.0;
     if (test_seq) {
-        seqTime = seqTest(M, numRuns);
+        seqTime = seqTest(numRuns, genSym);
         printf("Sequential time: %.9f\n", seqTime);
     }
     if (test_imp) {
-        impTime = impParTest(blockSize, M, numRuns);
+        impTime = impParTest(blockSize, numRuns, genSym);
         printf("Implicit parallel time: %.9f\n", impTime);
     }
     if (test_exp) {
-        ompTime = ompParTest(blockSize, ompThreads, M, numRuns);
+        ompTime = ompParTest(blockSize, ompThreads, numRuns, genSym);
         printf("OMP parallel time: %.9f\n", ompTime);
     }
     if ((test_seq) && (test_imp)){
@@ -140,6 +131,5 @@ int main(int argc, char** argv){
         printf("Speedup explicit parallel: %.9f\n", seqTime / ompTime);
     }
     printf("-------------------------\n");
-    free(M);
     return 0;
 }
