@@ -11,8 +11,10 @@ tests="-sio" # Default tests to run
 genSym=0  # Generate symmetric matrix (0 by default)
 profiling=""
 
-summary_file="summary.txt"
-> "$summary_file"
+summary_profiler_file="summary_profiler.txt"
+summary_comparison_file="summary_comparison.txt"
+> "$summary_profiler_file"
+> "$summary_comparison_file"
 
 group="MEM"
 
@@ -234,9 +236,9 @@ if [[ $profiling == "" ]]; then
                             echo "Running tests..."
                             echo "Matrix size: $N, Threads: $threads", Block size: $blockSize
                             echo "-------------------------"
-                            echo "-------------------------" >> "$summary_file"
-                            echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_file"
-                            ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads 2>&1 | tail -n 3 >> "$summary_file"
+                            echo "-------------------------" >> "$summary_comparison_file"
+                            echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_comparison_file"
+                            ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads 2>&1 | tail -n 3 >> "$summary_comparison_file"
                             make clean
                         fi
                     done
@@ -268,9 +270,9 @@ else
                             echo "Running tests..."
                             echo "Matrix size: $N, Threads: $threads", Block size: $blockSize
                             echo "-------------------------"
-                            echo "-------------------------" >> "$summary_file"
-                            echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_file"
-                            likwid-perfctr -V 0 -C 0-$(($threads-1)) -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_file"
+                            echo "-------------------------" >> "$summary_profiler_file"
+                            echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_profiler_file"
+                            likwid-perfctr -V 0 -C 0-$(($threads-1)) -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_profiler_file"
                             make clean
                         fi
                     done
@@ -281,4 +283,12 @@ else
 fi
 make clean
 echo "Summary:"
+summary_file=""
+if [[ $profiling == "" ]]; then
+    summary_file="$summary_comparison_file"
+    rm "$summary_profiler_file"
+else
+    summary_file="$summary_profiler_file"
+    rm "$summary_comparison_file"
+fi
 cat "$summary_file"
