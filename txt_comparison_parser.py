@@ -24,7 +24,13 @@ def parse_data(file_path):
 
     return parsed_data
 
-def plot_speedup(parsed_data):
+def plot_speedup(parsed_data, plot_type='both'):
+    """
+    Plots speedup data with options to plot implicit, OMP, or both.
+
+    :param parsed_data: List of parsed data dictionaries.
+    :param plot_type: A string specifying which points to plot: 'implicit', 'omp', or 'both'.
+    """
     fig, ax = plt.subplots()
 
     # Define colors and markers
@@ -51,26 +57,28 @@ def plot_speedup(parsed_data):
         # Collect explicit data
         explicit_data.append((matrix_size, block_size, threads, speedup_explicit))
 
-    # Calculate average implicit speedup and plot
-    plotted_implicit = set()
-    for matrix_size, block_data in implicit_data.items():
-        for block_size, speedups in block_data.items():
-            avg_speedup = sum(speedups) / len(speedups)
-            color_index = block_size % len(markers)  # Use block size for color differentiation
-            if (matrix_size, block_size) not in plotted_implicit:
-                ax.scatter(matrix_size_map[matrix_size], avg_speedup, color=color_map(color_index), marker='o',
-                           label=f'Implicit Avg (Block size: {block_size})')
-                plotted_implicit.add((matrix_size, block_size))
+    if plot_type in ['implicit', 'both']:
+        # Calculate average implicit speedup and plot
+        plotted_implicit = set()
+        for matrix_size, block_data in implicit_data.items():
+            for block_size, speedups in block_data.items():
+                avg_speedup = sum(speedups) / len(speedups)
+                color_index = block_size % len(markers)  # Use block size for color differentiation
+                if (matrix_size, block_size) not in plotted_implicit:
+                    ax.scatter(matrix_size_map[matrix_size], avg_speedup, color=color_map(color_index), marker='o',
+                               label=f'Implicit Avg (Block size: {block_size})')
+                    plotted_implicit.add((matrix_size, block_size))
 
-    # Plot OMP speedup with unique colors and markers
-    plotted_omp = set()
-    for i, (matrix_size, block_size, threads, speedup_explicit) in enumerate(explicit_data):
-        color_index = i % len(color_map.colors)  # Ensure varied color selection
-        marker_index = i % len(markers)
-        if (matrix_size, threads, block_size) not in plotted_omp:
-            ax.scatter(matrix_size_map[matrix_size], speedup_explicit, color=color_map(color_index), marker=markers[marker_index],
-                       label=f'OMP (Threads: {threads}, Block size: {block_size})')
-            plotted_omp.add((matrix_size, threads, block_size))
+    if plot_type in ['omp', 'both']:
+        # Plot OMP speedup with unique colors and markers
+        plotted_omp = set()
+        for i, (matrix_size, block_size, threads, speedup_explicit) in enumerate(explicit_data):
+            color_index = i % len(color_map.colors)  # Ensure varied color selection
+            marker_index = i % len(markers)
+            if (matrix_size, threads, block_size) not in plotted_omp:
+                ax.scatter(matrix_size_map[matrix_size], speedup_explicit, color=color_map(color_index), marker=markers[marker_index],
+                           label=f'OMP (Threads: {threads}, Block size: {block_size})')
+                plotted_omp.add((matrix_size, threads, block_size))
 
     # Set labels and title
     ax.set_xlabel('Matrix Size')
@@ -96,5 +104,5 @@ def plot_speedup(parsed_data):
 # Example usage
 file_path = 'summary_comparison.txt'  # Replace with your actual file path
 parsed_data = parse_data(file_path)
-plot_speedup(parsed_data)
+plot_speedup(parsed_data, plot_type='implicit')
 #export QT_QPA_PLATFORM=offscreen Fucking WSL doesn't support GUI so we need to disable it

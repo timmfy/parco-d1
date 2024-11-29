@@ -22,12 +22,12 @@ group="MEM"
 show_help() {
     echo "Usage: $0 [OPTION]..."
     echo "Options:"
-    echo "  --block-size-range <int> <int> Run the test for the range of block sizes 2^<int> to 2^<int> (default: 2^4 2^4)"
+    echo "  --block-size-list <int,int,...> Run the test for the list of block sizes 2^<int> (default: 2^4)"
     echo "  -h --help              Display this information"
     echo " --group <string>     Set the performance group for likwid (default: CACHES)"
-    echo " --threads-range <int int> Run the test for the range of threads 2^<int> to 2^<int> (default: 2^1 2^3, max: 2^6)"
+    echo " --threads-list <int,int,...> Run the test for the list of threads 2^<int> (default: 2^1 2^3, max: 2^6)"
     echo " --profiling <string> Run the specified test with profiling (seq, imp, omp)"
-    echo " --size-range <int int> Run the test for the range of sizes 2^<int> to 2^<int> (default: 2^10 2^10)"
+    echo " --size-list <int,int,...> Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)"
     echo "  --runs <int>        Set the number of runs (default: 1)"
     echo "  --symm <int>        Generate a symmetric matrix (default: 0)"
 }
@@ -39,37 +39,35 @@ while [[ $# -gt 0 ]]; do
             show_help
             exit 0
             ;;
-        --size-range)
-            if [[ -n $2 ]] && [[ -n $3 ]]; then
-                if [[ $2 -le 0 || $2 -gt 12 || $3 -le 0 || $3 -gt 12 || $2 -gt $3 ]]; then
-                    echo "Error: Invalid matrix size range"
-                    exit 1
-                fi
+        --size-list)
+            if [[ -n $2 ]]; then
                 nRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
-                for (( i=$2; i<=$3; i++ )); do
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 12 ]]; then
+                        echo "Error: Invalid size"
+                        exit 1
+                    fi
                     nRange[$i]=1
                 done
                 shift
-                shift
             else
-                echo "Error: --size-range flag requires two arguments"
+                echo "Error: --size-range flag requires an argument"
                 exit 1
             fi
             ;;
-        --block-size-range)
-            if [[ -n $2 ]] && [[ -n $3 ]]; then
-                if [[ $2 -le 0 || $2 -gt 12 || $3 -le 0 || $3 -gt 12 || $2 -gt $3 ]]; then
-                    echo "Error: Invalid block size range"
-                    exit 1
-                fi
+        --block-size-list)
+            if [[ -n $2 ]]; then
                 bsRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
-                for (( i=$2; i<=$3; i++ )); do
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 12 ]]; then
+                        echo "Error: Invalid block size"
+                        exit 1
+                    fi
                     bsRange[$i]=1
                 done
                 shift
-                shift
             else
-                echo "Error: --block-size-range flag requires two arguments"
+                echo "Error: --block-size-range flag requires an argument"
                 exit 1
             fi
             ;;
@@ -134,20 +132,19 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        --threads-range)
-            if [[ -n $2 ]] && [[ -n $3 ]]; then
-                if [[ $2 -le 0 || $2 -gt 6 || $3 -le 0 || $3 -gt 6 ]]; then
-                    echo "Error: Invalid thread range"
-                    exit 1
-                fi
+        --threads-list)
+            if [[ -n $2 ]]; then
                 tRange=(0 0 0 0 0 0 0)
-                for (( i=$2; i<=$3; i++ )); do
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 6 ]]; then
+                        echo "Error: Invalid number of threads"
+                        exit 1
+                    fi
                     tRange[$i]=1
                 done
                 shift
-                shift
             else
-                echo "Error: --threads-range flag requires two arguments"
+                echo "Error: --threads-range flag requires an argument"
                 exit 1
             fi
             ;;
