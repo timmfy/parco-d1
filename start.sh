@@ -187,7 +187,7 @@ cat <<EOL > parco-d1-job.pbs
 #PBS -o ./parco-d1-job.out
 #PBS -e ./parco-d1-job.err
 #PBS -q short_cpuQ
-#PBS -l walltime=0:01:00
+#PBS -l walltime=0:05:00
 #PBS -l select=1:ncpus=64:mem=1gb
 module load gcc91
 module load likwid-4.3.4
