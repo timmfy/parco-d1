@@ -24,7 +24,7 @@ where `[OPTIONS]` are among the following:
     --runs <int>                    Set the number of runs (default: 1)
     --symm <int>                    Generate a symmetric matrix (default: 0)
 ```
-With no options, the script runs the test for the block size \(2^4\), the threads \(2^2\), the matrix size \(2^{10}\), and does 1 run.
+With no options, the script runs the test for the block size 2<sup>4</sup> x 2<sup>4</sup>, the threads 2<sup>2</sup>, the matrix size 2<sup>10</sup> x 2<sup>10</sup>, and does 1 run.
 ```bash
 ./start.sh
 ```
