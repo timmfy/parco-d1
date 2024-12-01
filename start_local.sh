@@ -2,9 +2,9 @@
 
 # Default values
 #Ranges of values
-nRange=(0 0 0 0 0 0 0 0 0 0 1 0 0)
-tRange=(0 1 1 1 0 0 0)
-bsRange=(0 0 0 1 1 1 0 0 0 0 0 0 0)
+nRange=(0 0 0 0 0 0 0 0 0 0 1 0 0) # Default matrix size 1024
+tRange=(0 0 1 0 0 0 0) #Default number of threads 4
+bsRange=(0 0 0 0 1 0 0 0 0 0 0 0 0) # Default block size 16
 blockSize=16  # Default block size
 numRuns=1  # Default number of runs
 tests="-sio" # Default tests to run
@@ -25,7 +25,7 @@ show_help() {
     echo "  --block-size-list <int,int,...> Run the test for the list of block sizes 2^<int> (default: 2^4)"
     echo "  -h --help              Display this information"
     echo " --group <string>     Set the performance group for likwid (default: CACHES)"
-    echo " --threads-list <int,int,...> Run the test for the list of threads 2^<int> (default: 2^1 2^3, max: 2^6)"
+    echo " --threads-list <int,int,...> Run the test for the list of threads 2^<int> (default: 2^2, max: 2^6)"
     echo " --profiling <string> Run the specified test with profiling (seq, imp, omp)"
     echo " --size-list <int,int,...> Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)"
     echo "  --runs <int>        Set the number of runs (default: 1)"
@@ -175,11 +175,11 @@ done
 
 if [[ $profiling == "seq" ]]; then
     tests="-s"
-    tRange=(1 0 0 0 0 0 0)
-    bsRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
+    tRange=(0 1 0 0 0 0 0)
+    bsRange=(1 0 0 0 0 0 0 0 0 0 0 0 0)
 elif [[ $profiling == "imp" ]]; then
     tests="-i"
-    tRange=(1 0 0 0 0 0 0)
+    tRange=(0 1 0 0 0 0 0)
 elif [[ $profiling == "omp" ]]; then
     tests="-o"
 fi
@@ -197,18 +197,12 @@ fi
 if [[ $group == "DATA" ]]; then
     metrics=("ratio") 
 fi
+if [[ $group == "CACHES" ]]; then
+    metrics=("L1 load bandwidth" "L1 to/from L2 bandwidth" " L1 to L2 evict bandwidth") 
+fi
+echo "Metrics: ${metrics[*]}"
 
 pattern=$(IFS=\|; echo "${metrics[*]}")
-
-for i in "${!nRange[@]}"; do
-    if [[ ${nRange[$i]} -eq 1 ]]; then
-        N=$((2**$i))
-        if [[ $blockSize -gt $N ]]; then
-            echo "Error: Block size must be less than or equal to matrix size"
-            exit 1
-        fi
-    fi
-done
 
 if [[ $profiling == "" ]]; then
     #Compile and run for the nRange
@@ -235,7 +229,7 @@ if [[ $profiling == "" ]]; then
                             echo "-------------------------"
                             echo "-------------------------" >> "$summary_comparison_file"
                             echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_comparison_file"
-                            ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads 2>&1 | tail -n 3 >> "$summary_comparison_file"
+                            ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads | tail -n 3 >> "$summary_comparison_file"
                             make clean
                         fi
                     done
@@ -246,8 +240,6 @@ if [[ $profiling == "" ]]; then
 else
     #Compile and profile with likwid the selected test
     #for threads and sizes
-    echo ${nRange[@]}
-    echo ${tRange[@]}
     echo "Tests to run: $tests"
     for i in "${!nRange[@]}"; do
         if [[ ${nRange[$i]} -eq 1 ]]; then
@@ -269,7 +261,7 @@ else
                             echo "-------------------------"
                             echo "-------------------------" >> "$summary_profiler_file"
                             echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_profiler_file"
-                            likwid-perfctr -V 0 -C 0-$(($threads-1)) -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_profiler_file"
+                            likwid-perfctr -V 0 -C 0-$(($threads-1)) -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads  | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_profiler_file" #
                             make clean
                         fi
                     done
