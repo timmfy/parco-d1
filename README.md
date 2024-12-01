@@ -28,11 +28,11 @@ With no options, the script runs the test for the block size 2<sup>4</sup> x 2<s
 ```bash
 ./start.sh
 ```
-Example that runs the test for the block sizes \(2^4\), \(2^5\), \(2^6\), the threads \(2^2\), \(2^3\), \(2^4\), the matrix sizes \(2^{10}\) , \(2^{11}\), \(2^{12}\), and does 5 runs:
+Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup>, the threads 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup>, the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
 ```bash
 ./start.sh --block-size-list 4,5,6 --threads-list 2,3,4 --size-list 10,11,12 --runs 5
 ```
-Example that runs the test for the block size \(2^6\), the matrix size \(2^{12}\), and does 20 runs with likwid-perfctr profiling of the group CACHES for
+Example that runs the test for the block size 2<sup>6</sup>, the matrix size 2<sup>12</sup>, and does 20 runs with likwid-perfctr profiling of the group CACHES for
 the implicit parallel implementation:
 ```bash
 ./start.sh --profiling imp --runs 20 --block-size-list 6 --size-list 12 --group CACHES
