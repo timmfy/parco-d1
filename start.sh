@@ -1,53 +1,87 @@
 #!/bin/bash
 
 # Default values
-N=1024  # Default matrix size (2^10)
-blockSize=4  # Default block size
+nRange=(0 0 0 0 0 0 0 0 0 0 1 0 0) # Default matrix size 1024
+tRange=(0 0 1 0 0 0 0) # Default number of threads 4
+bsRange=(0 0 0 0 1 0 0 0 0 0 0 0 0) # Default block size 16
 numRuns=1  # Default number of runs
-tests="-" 
+tests="-sio" # Default tests to run
 genSym=0  # Generate symmetric matrix (0 by default)
-threads=4 # Default number of threads
+profiling="none"
+group="MEM"
 
 # Function to display help
 show_help() {
     echo "Usage: $0 [OPTION]..."
     echo "Options:"
-    echo "  -a                  Run all tests"
-    echo "  --block-size <int>  Set the block size to <int> (default: 4)"
-    echo "  -e                  Run explicit parallel test"
+    echo "  --block-size-list <int,int,...> Run the test for the list of block sizes 2^<int> (default: 2^4)"
     echo "  -h --help              Display this information"
-    echo "  -i                  Run implicit parallel test"
-    echo " --threads <int>     Set the number of threads (default: 4)"
-    echo " --profiling <string> Run the specified test with profiling"
+    echo " --group <string>     Set the performance group for likwid (default: CACHES)"
+    echo " --threads-list <int,int,...> Run the test for the list of threads 2^<int> (default: 2^2, max: 2^6)"
+    echo " --profiling <string> Run the specified test with profiling (seq, imp, omp)"
+    echo " --size-list <int,int,...> Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)"
     echo "  --runs <int>        Set the number of runs (default: 1)"
-    echo "  --size <int>        Set the matrix size to 2^<int> (default: 2^10)"
     echo "  --symm <int>        Generate a symmetric matrix (default: 0)"
-    echo "  -s                  Run sequential test"
-   
 }
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --help)
+        -h|--help)
             show_help
             exit 0
             ;;
-        --size)
+        --size-list)
             if [[ -n $2 ]]; then
-                N=$((2**$2))
+                nRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 12 ]]; then
+                        echo "Error: Invalid size"
+                        exit 1
+                    fi
+                    nRange[$i]=1
+                done
                 shift
             else
-                echo "Error: --size flag requires an argument"
+                echo "Error: --size-range flag requires an argument"
                 exit 1
             fi
             ;;
-        --block-size)
+        --block-size-list)
             if [[ -n $2 ]]; then
-                blockSize=$2
+                bsRange=(0 0 0 0 0 0 0 0 0 0 0 0 0)
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 12 ]]; then
+                        echo "Error: Invalid block size"
+                        exit 1
+                    fi
+                    bsRange[$i]=1
+                done
                 shift
             else
-                echo "Error: --block-size flag requires an argument"
+                echo "Error: --block-size-range flag requires an argument"
+                exit 1
+            fi
+            ;;
+        --group)
+            if [[ -n $2 ]]; then
+                group=$2
+                shift
+            else
+                echo "Error: --group flag requires an argument"
+                exit 1
+            fi
+            ;;
+        --profiling)
+            if [[ -n $2 ]]; then
+                profiling=$2
+                if [[ $profiling != "seq" && $profiling != "imp" && $profiling != "omp" ]]; then
+                    echo "Error: Invalid profiling argument"
+                    exit 1
+                fi
+                shift
+            else
+                echo "Error: --profiling flag requires an argument"
                 exit 1
             fi
             ;;
@@ -77,46 +111,21 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        --threads)
+        --threads-list)
             if [[ -n $2 ]]; then
-                threads=$2
-                if [[ $threads -le 0 ]]; then
-                    echo "Error: Number of threads must be greater than 0"
-                    exit 1
-                fi
+                tRange=(0 0 0 0 0 0 0)
+                for i in $(echo $2 | sed "s/,/ /g"); do
+                    if [[ $i -le 0 || $i -gt 6 ]]; then
+                        echo "Error: Invalid number of threads"
+                        exit 1
+                    fi
+                    tRange[$i]=1
+                done
                 shift
             else
-                echo "Error: --threads flag requires an argument"
+                echo "Error: --threads-range flag requires an argument"
                 exit 1
             fi
-            ;;
-        -?*)
-            for (( i=1; i<${#1}; i++ )); do
-                case ${1:i:1} in
-                    a)
-                        test_seq=1
-                        test_imp=1
-                        test_exp=1
-                        ;;
-                    s)
-                        test_seq=1
-                        ;;
-                    i)
-                        test_imp=1
-                        ;;
-                    e)
-                        test_exp=1
-                        ;;
-                    h)
-                        show_help
-                        exit 0
-                        ;;
-                    *)
-                        echo "Error: Invalid test option '${1:i:1}'"
-                        exit 1
-                        ;;
-                esac
-            done
             ;;
         *)
             echo "Error: Unknown argument '$1'"
@@ -126,48 +135,66 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ $N -le 1 || $N -gt 4096 ]]; then
-    echo "Error: Invalid matrix size"
-    exit 1
+# Check if the block size range is in the selected matrix size range
+maxBlockSize=0
+for i in "${!bsRange[@]}"; do
+    if [[ ${bsRange[$i]} -eq 1 ]]; then
+        maxBlockSize=$((2**$i))
+    fi
+done
+for i in "${!nRange[@]}"; do
+    if [[ ${nRange[$i]} -eq 1 ]]; then
+        N=$((2**$i))
+        if [[ $maxBlockSize -gt $N ]]; then
+            echo "Error: Block size must be less than or equal to matrix size"
+            exit 1
+        fi
+    fi
+done
+
+if [[ $profiling == "seq" ]]; then
+    tests="-s"
+    tRange=(0 1 0 0 0 0 0)
+    bsRange=(1 0 0 0 0 0 0 0 0 0 0 0 0)
+elif [[ $profiling == "imp" ]]; then
+    tests="-i"
+    tRange=(0 1 0 0 0 0 0)
+elif [[ $profiling == "omp" ]]; then
+    tests="-o"
 fi
 
-if [[ $blockSize -le 1 || $blockSize -gt 4096 ]]; then
-    echo "Error: Invalid block size"
-    exit 1
+metrics=(".*")
+if [[ $group == "MEM" ]]; then
+    metrics=("memory bandwidth")
+fi
+if [[ $group == "L2CACHE" ]] || [[ $group == "L3CACHE" ]]; then
+    metrics=("miss rate" "miss ratio") 
+fi
+if [[ $group == "L2" ]] || [[ $group == "L3" ]]; then
+    metrics=("bandwidth") 
+fi
+if [[ $group == "DATA" ]]; then
+    metrics=("ratio") 
+fi
+if [[ $group == "CACHES" ]]; then
+    metrics=("L1 load bandwidth" "L1 to/from L2 bandwidth" " L1 to L2 evict bandwidth") 
 fi
 
-if [[ $test_seq -ne 0 ]]; then
-    tests+="s"
-fi
-if [[ $test_imp -ne 0 ]]; then
-    tests+="i"
-fi
-if [[ $test_exp -ne 0 ]]; then
-    tests+="e"
-fi
-if [[ $tests == "-" ]]; then
-    tests="-sie"
-fi
-
+# Call the execution script with the parsed parameters
 cat <<EOL > parco-d1-job.pbs
 #!/bin/bash
 #PBS -N parco-d1-job
 #PBS -o ./parco-d1-job.out
 #PBS -e ./parco-d1-job.err
 #PBS -q short_cpuQ
-#PBS -l walltime=0:03:00
-#PBS -l select=1:ncpus=1:mem=1mb
+#PBS -l walltime=0:01:00
+#PBS -l select=1:ncpus=64:mem=1gb
 module load gcc91
+module load likwid-4.3.4
+export OMP_NUM_THREADS=64
 cd ${PWD}
 echo "Number of runs: $numRuns"
 echo "-------------------------"
-echo "Compiling..."
-echo "-------------------------"
-make all N=$N
-echo "-------------------------"
-echo "Running tests..."
-echo "-------------------------"
-./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads
-make clean
-
+./runner.sh ${nRange[@]} ${tRange[@]} ${bsRange[@]} $numRuns $tests $genSym $profiling $group ${metrics[@]}
 EOL
+

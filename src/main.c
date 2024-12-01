@@ -104,7 +104,7 @@ int main(int argc, char** argv){
         exit(1);
     }
     printf("Block size: %d\n", blockSize);
-    if ((blockSize <= 1) || (blockSize > 4096)){
+    if ((blockSize < 1) || (blockSize > 4096)){
         fprintf(stderr, "%s", "Error: Invalid block size\n");
         exit(1);
     }

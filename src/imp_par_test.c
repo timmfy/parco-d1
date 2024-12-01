@@ -22,17 +22,17 @@ double impParTest(int blockSize, int numRuns, int symmetric){
             M = matGenerateSym();
             continue;
         }
-        double* T = matTransposeImp(M, blockSize, &time);
-        //printf("Time to transpose: %.9f\n", time);
+        double* T = matTransposeImpCacheObliviousTime(M, blockSize, &time);
         avgTime += time;
-        // if (!isTransposed(M, T)) {
-        //     fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
-        //     exit(1);
-        // }
+        if (!isTransposed(M, T)) {
+            fprintf(stderr, "%s", "Error: Parallel transpose failed\n");
+            exit(1);
+        }
         matRandomize(M);
         free(T);
     }
     avgTime /= numRuns;
     printf("Average time of %d runs: %.9f\n", numRuns, avgTime);
+    free(M);
     return avgTime;
 }

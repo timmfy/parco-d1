@@ -34,5 +34,6 @@ double seqTest(int numRuns, int symmetric){
     }
     avgTime /= numRuns;
     printf("Average time of %d runs: %.9f\n", numRuns, avgTime);
+    free(M);
     return avgTime;
 }
