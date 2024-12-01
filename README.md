@@ -1,4 +1,4 @@
-# Benchmarking the Performance of Implicit and Explicit Parallel Implementations of Matrix Transpose
+# Benchmarking the Performance of Implicit and Explicit Parallel Implementations of the Matrix Transpose
 
 
 ## Instructions to run the code
@@ -22,7 +22,7 @@ where `[OPTIONS]` are among the following:
     --profiling <string>            Run the specified test with profiling (seq, imp, omp)
     --size-list <int,int,...>       Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)
     --runs <int>                    Set the number of runs (default: 1)
-    --symm <int>                    Generate a symmetric matrix (default: 0)
+    --symm <int>                    Generate a symmetric matrix (1 to generate the symmetric matrix, 0 to generate a random, default: 0)
 ```
 With no options, the script runs the test for the block size 2<sup>4</sup> x 2<sup>4</sup>, the threads 2<sup>2</sup>, the matrix size 2<sup>10</sup> x 2<sup>10</sup>, and does 1 run.
 ```bash
