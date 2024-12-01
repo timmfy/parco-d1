@@ -46,4 +46,5 @@ qsub parco-d1-job.pbs
 2. 'parco-d1-job.err' contains the compiler messages and errors
 3. 'summary_comparison.txt' contains the average speedup for each configuration and input parameters
 4. 'summary_profiling.txt' contains the performance metrics for the configuration that was run with profiling
+   
 The content of the summary files is also redirected to the 'parco-d1-job.out' file.
