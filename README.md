@@ -22,13 +22,13 @@ where `[OPTIONS]` are among the following:
     --profiling <string>            Run the specified test with profiling (seq, imp, omp)
     --size-list <int,int,...>       Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)
     --runs <int>                    Set the number of runs (default: 1)
-    --symm <int>                    Generate a symmetric matrix (1 to generate the symmetric matrix, 0 to generate a random, default: 0)
+    --symm <int>                    Generate a symmetric matrix (1 to generate the symmetric matrix, 0 to generate a random one, default: 0)
 ```
 With no options, the script runs the test for the block size 2<sup>4</sup> x 2<sup>4</sup>, the threads 2<sup>2</sup>, the matrix size 2<sup>10</sup> x 2<sup>10</sup>, and does 1 run.
 ```bash
 ./start.sh
 ```
-Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup>, 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup> threads , the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
+Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup> and for 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup> threads , the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
 ```bash
 ./start.sh --block-size-list 4,5,6 --threads-list 2,3,4 --size-list 10,11,12 --runs 5
 ```
