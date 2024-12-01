@@ -28,7 +28,7 @@ With no options, the script runs the test for the block size 2<sup>4</sup> x 2<s
 ```bash
 ./start.sh
 ```
-Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup>, the threads 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup>, the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
+Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup>, 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup> threads , the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
 ```bash
 ./start.sh --block-size-list 4,5,6 --threads-list 2,3,4 --size-list 10,11,12 --runs 5
 ```
