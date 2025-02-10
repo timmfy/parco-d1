@@ -14,7 +14,7 @@ module load gcc91
 module load likwid-4.3.4
 export OMP_NUM_THREADS=64
 gcc() {
-    gcc-9.1.0 "$@"
+    gcc-9.1.0 "\$@"
 }
 cd ${PWD}
 echo "Number of runs: $numRuns"

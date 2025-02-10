@@ -12,7 +12,7 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 # Compiler and flags
-CC := gcc
+CC := $(shell qsub --version >/dev/null 2>&1 && echo gcc-9.1.0 || echo gcc)
 CFLAGS := -Wall -Wextra -fopenmp -DN=$(N)
 LDFLAGS := -fopenmp
 
