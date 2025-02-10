@@ -99,18 +99,11 @@ Then, submit the job to the scheduler
 ```bash
 qsub parco-d1-job.pbs
 ```
-### 5. The code generates the output files in the working directory
-1. 'parco-d1-job.out' contains the output of the job
-2. 'parco-d1-job.err' contains the compiler messages and errors
-3. 'summary_comparison.txt' contains the average speedup for each configuration and input parameters
-4. 'summary_profiling.txt' contains the performance metrics for the configuration that was run with profiling
-   
-The content of the summary files is also redirected to the 'parco-d1-job.out' file.
 
 ## Output and Results
 The output is stored in the following files:
-1. 'parco-d1-job.out' contains the output of the job (if run on the HPC cluster)
-2. 'parco-d1-job.err' contains the compiler messages and errors (if run on the HPC cluster)
-3. 'summary_comparison.txt' contains the average speedup for each configuration and input parameters (if run with multiple runs using a script)
-4. 'summary_profiling.txt' contains the performance metrics for the configuration that was run with profiling (if run with profiling using a script)
-The 'parco-d1-job.out' file (if exists) contains also the redirected output of the code execution (for example, the gcc optimization information).
+1. `parco-d1-job.out` contains the output of the job (if run on the HPC cluster)
+2. `parco-d1-job.err` contains the compiler messages and errors (if run on the HPC cluster)
+3. `summary_comparison.txt` contains the average speedup for each configuration and input parameters (if run with multiple runs using a script)
+4. `summary_profiling.txt` contains the performance metrics for the configuration that was run with profiling (if run with profiling using a script)
+The `parco-d1-job.out` file (if exists) contains also the redirected output of the code execution (for example, the gcc optimization information).
