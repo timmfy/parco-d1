@@ -16,7 +16,7 @@ show_help() {
     echo "Options:"
     echo "  --block-size-list <int,int,...> Run the test for the list of block sizes 2^<int> (default: 2^4)"
     echo "  -h --help              Display this information"
-    echo " --group <string>     Set the performance group for likwid (default: CACHES)"
+    echo " --group <string>     Set the performance group for likwid (default: CACHES, possible values: MEM, L2CACHE, L3CACHE, L2, L3, DATA, CACHES)"
     echo " --threads-list <int,int,...> Run the test for the list of threads 2^<int> (default: 2^2, max: 2^6)"
     echo " --profiling <string> Run the specified test with profiling (seq, imp, omp)"
     echo " --size-list <int,int,...> Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)"
@@ -179,22 +179,3 @@ fi
 if [[ $group == "CACHES" ]]; then
     metrics=("L1 load bandwidth" "L1 to/from L2 bandwidth" " L1 to L2 evict bandwidth") 
 fi
-
-# Call the execution script with the parsed parameters
-cat <<EOL > parco-d1-job.pbs
-#!/bin/bash
-#PBS -N parco-d1-job
-#PBS -o ./parco-d1-job.out
-#PBS -e ./parco-d1-job.err
-#PBS -q short_cpuQ
-#PBS -l walltime=0:01:00
-#PBS -l select=1:ncpus=64:mem=1gb
-module load gcc91
-module load likwid-4.3.4
-export OMP_NUM_THREADS=64
-cd ${PWD}
-echo "Number of runs: $numRuns"
-echo "-------------------------"
-./runner.sh ${nRange[@]} ${tRange[@]} ${bsRange[@]} $numRuns $tests $genSym $profiling $group ${metrics[@]}
-EOL
-
