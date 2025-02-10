@@ -1,6 +1,5 @@
-# Benchmarking the Performance of Implicit and Explicit Parallel Implementations of Matrix Transpose
-
-
+# Benchmarking the Performance of Implicit and Explicit Parallel Implementations of the Matrix Transpose
+The repository contains the code for the benchmarking of the performance of the matrix transpose operation comparing the sequential, implicit parallel using the SIMD instructions and explicit parallel using the OpenMP library. The cache performance and the memory bandwidth are measured on the HPC cluster using the Likwid performance analysis tool.
 ## Toolchain Used
 - `GCC 9.1.0` (module `gcc91` on the HPC Cluster)
 - `OpenMP 4.5`
@@ -30,13 +29,13 @@ where `[OPTIONS]` are among the following:
     --profiling <string>            Run the specified test with profiling (seq, imp, omp)
     --size-list <int,int,...>       Run the test for the list of sizes 2^<int> (default: 2^10, max: 2^12)
     --runs <int>                    Set the number of runs (default: 1)
-    --symm <int>                    Generate a symmetric matrix (default: 0)
+    --symm <int>                    Generate a symmetric matrix (1 to generate the symmetric matrix, 0 to generate a random one, default: 0)
 ```
 With no options, the script runs the test for the block size 2<sup>4</sup> x 2<sup>4</sup>, the threads 2<sup>2</sup>, the matrix size 2<sup>10</sup> x 2<sup>10</sup>, and does 1 run.
 ```bash
 ./scripts/run_locally.sh
 ```
-Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup>, the threads 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup>, the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
+Example that runs the test for the block sizes 2<sup>4</sup>, 2<sup>5</sup>, 2<sup>6</sup> and for 2<sup>2</sup>, 2<sup>3</sup>, 2<sup>4</sup> threads , the matrix sizes 2<sup>10</sup>, 2<sup>11</sup>, 2<sup>12</sup>, and does 5 runs:
 ```bash
 ./scripts/run_locally.sh --block-size-list 4,5,6 --threads-list 2,3,4 --size-list 10,11,12 --runs 5
 ```
@@ -100,6 +99,13 @@ Then, submit the job to the scheduler
 ```bash
 qsub parco-d1-job.pbs
 ```
+### 5. The code generates the output files in the working directory
+1. 'parco-d1-job.out' contains the output of the job
+2. 'parco-d1-job.err' contains the compiler messages and errors
+3. 'summary_comparison.txt' contains the average speedup for each configuration and input parameters
+4. 'summary_profiling.txt' contains the performance metrics for the configuration that was run with profiling
+   
+The content of the summary files is also redirected to the 'parco-d1-job.out' file.
 
 ## Output and Results
 The output is stored in the following files:
