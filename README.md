@@ -66,6 +66,10 @@ Then, run with the following command:
 ```bash
 ./main --block-size <blockSize> --runs <runs> --symm <symm> <tests> --threads <threads>
 ```
+If the code was compiled with the Makefile, run using
+```bash
+./bin/main --block-size <blockSize> --runs <runs> --symm <symm> <tests> --threads <threads>
+```
 where `<blockSize>` is the block size for the cache blocking/cache oblivious algorithms, `<runs>` is the number of runs, `<threads>` is the number of threads for OpenMP, and `<symm>` is a flag that generates a symmetric matrix.
 <tests> is a flag that specifies which tests to run (seq (`-s`) for the sequential test, imp (`-i`) for the implicit parallel test, omp (`-o`) for the OpenMP test). The tests can be combined (e.g., `-si` for the sequential and implicit parallel tests or `-sio` for all tests).
 For example, the following command runs the sequential and OMP parallel tests with the block size 16, 5 runs, and 4 threads:
