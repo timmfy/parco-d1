@@ -86,6 +86,10 @@ module load gcc91
 module load likwid-4.3.4
 gcc() { gcc-9.1.0 "$@"; }
 ```
+Set the number of threads for OpenMP
+```bash
+export OMP_NUM_THREADS=64
+```
 Then, it is possible to proceed the same way as running locally either with the scripts or the manual compilation.
 
 ### Running with a PBS scheduler

@@ -74,7 +74,13 @@ else
                             echo "-------------------------"
                             echo "-------------------------" >> "$summary_profiler_file"
                             echo "Matrix size: $N, Threads: $threads", Block size: $blockSize >> "$summary_profiler_file"
-                            likwid-perfctr -V 0 -C 0-$(($threads-1)) -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads  | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_profiler_file"
+                            if [[ $threads -eq 1 ]]; then
+                                likwid-perfctr -V 0 -C 0 -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads  | grep -v "Event\|_" >> "$summary_profiler_file"
+                            else
+                                core_range="0-$(($threads-1))"
+                                likwid-perfctr -V 0 -C $core_range -g $group ./bin/main --block-size $blockSize --runs $numRuns --symm $genSym $tests --threads $threads  | grep "Sum\|STAT" | grep -v "Event\|_" | grep -Ei "$pattern|Sum" >> "$summary_profiler_file"
+
+                            fi
                             make clean
                         fi
                     done

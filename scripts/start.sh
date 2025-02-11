@@ -115,7 +115,7 @@ while [[ $# -gt 0 ]]; do
             if [[ -n $2 ]]; then
                 tRange=(0 0 0 0 0 0 0)
                 for i in $(echo $2 | sed "s/,/ /g"); do
-                    if [[ $i -le 0 || $i -gt 6 ]]; then
+                    if [[ $i -lt 0 || $i -gt 6 ]]; then
                         echo "Error: Invalid number of threads"
                         exit 1
                     fi
@@ -154,11 +154,11 @@ done
 
 if [[ $profiling == "seq" ]]; then
     tests="-s"
-    tRange=(0 1 0 0 0 0 0)
+    tRange=(1 0 0 0 0 0 0)
     bsRange=(1 0 0 0 0 0 0 0 0 0 0 0 0)
 elif [[ $profiling == "imp" ]]; then
     tests="-i"
-    tRange=(0 1 0 0 0 0 0)
+    tRange=(1 0 0 0 0 0 0)
 elif [[ $profiling == "omp" ]]; then
     tests="-o"
 fi
